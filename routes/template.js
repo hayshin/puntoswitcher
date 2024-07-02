@@ -7,8 +7,8 @@ router.use(authMiddleware);
 
 router.post("/", async (req, res) => {
   try {
-    const { templates, text } = req.body;
-    const template = new Template({ templates, text, owner: req.user.id });
+    const { templates, text, owner } = req.body;
+    const template = new Template({ templates, text, owner });
     await template.save();
     res.status(201).json(template);
   } catch (error) {

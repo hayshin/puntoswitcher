@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "your_default_secret";
 
 router.post("/signup", async (req, res) => {
   try {
@@ -11,7 +10,10 @@ router.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ login, password: hashedPassword });
     await user.save();
-    res.status(201).json({ message: "User created successfully" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    res.status(201).json({ token });
   } catch (error) {
     res.status(500).json({ message: "Error creating user", error });
   }
@@ -26,7 +28,7 @@ router.post("/signin", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid password" });
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
     res.json({ token, userId: user._id });
