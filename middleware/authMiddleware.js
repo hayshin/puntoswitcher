@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const config = require("../config");
-const User = require("../models/user");
+
+const JWT_SECRET = process.env.JWT_SECRET || "your_default_secret";
 
 module.exports = (req, res, next) => {
   const token = req.header("Authorization");
@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ message: "No token, authorization denied" });
 
   try {
-    const decoded = jwt.verify(token, config.secret);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {

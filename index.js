@@ -1,13 +1,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const config = require("./config");
 const authRoutes = require("./routes/auth");
 const templateRoutes = require("./routes/template");
+
 const app = express();
 
+const PORT = process.env.PORT || 5000;
+const MONGO_URI =
+  process.env.MONGO_URI || "mongodb://localhost:27017/tampermonkey";
+const JWT_SECRET = process.env.JWT_SECRET || "your_default_secret";
+
+// Connect to MongoDB
 mongoose
-  .connect(config.database, {
+  .connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -19,5 +25,4 @@ app.use(bodyParser.json());
 app.use("/auth", authRoutes);
 app.use("/templates", templateRoutes);
 
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
