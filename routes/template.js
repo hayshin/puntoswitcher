@@ -1,14 +1,12 @@
 const express = require("express");
 const Template = require("../models/template");
-const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
-router.use(authMiddleware);
-
+// Create template endpoint
 router.post("/", async (req, res) => {
+  const { templates, text, userId } = req.body;
   try {
-    const { templates, text, owner } = req.body;
-    const template = new Template({ templates, text, owner });
+    const template = new Template({ templates, text, owner: userId });
     await template.save();
     res.status(201).json(template);
   } catch (error) {
@@ -16,19 +14,21 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+// Get templates endpoint
+router.get("/:userId", async (req, res) => {
   try {
-    const templates = await Template.find({ owner: req.user.id });
+    const templates = await Template.find({ owner: req.params.userId });
     res.json(templates);
   } catch (error) {
     res.status(500).json({ message: "Error fetching templates", error });
   }
 });
 
+// Delete template endpoint
 router.delete("/", async (req, res) => {
+  const { templId, userId } = req.body;
   try {
-    const { templId } = req.body;
-    await Template.deleteOne({ _id: templId, owner: req.user.id });
+    await Template.deleteOne({ _id: templId, owner: userId });
     res.json({ message: "Template deleted" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting template", error });
